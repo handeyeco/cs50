@@ -43,7 +43,7 @@ int main (int argc, string argv[]) {
 }
 
 int encrypt (int input, int key) {
-    //Set base number based on if char is upper or lowercase
+    //Set base number by if char is upper or lowercase
     int base = input > 96 ? 97 : 65;
 
     //Zero-index letter, mod through characters, and re-add base for ASCII
