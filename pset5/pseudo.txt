@@ -1,0 +1,31 @@
+char* word = "abba";
+[a][b][b][a][\0]
+
+size = 27
+
+node node_array[size];
+initialize node_array values to null
+
+for each letter in the word
+  function search_array (letter, array)
+    convert letter to lowercase
+    convert letter to ASCII value - 97 (n)
+
+    if letter array[n] is null
+      create struct for letter at n
+      create new letter array
+      point struct at n to new letter array
+
+    if next letter == \0
+      assign struct is_word to true
+      break
+    else
+      search_array (next_letter, new_array)
+
+DICTIONARY = [a] [ ] [ ] ... [ ] [\0]
+              |
+         [ ] [b] [ ] ... [ ] [\0]
+              |
+         [ ] [b] [ ] ... [ ] [\0]
+              |
+             [a] [ ] [ ] ... [ ] [\0]
