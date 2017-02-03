@@ -1,12 +1,15 @@
-print "Height: ",
-height = input()
+height = 0
+
+while height < 1 or height > 23:
+    print("Height (1-23):", end=" ")
+    height = int(input())
 
 for row in range(height):
     text = ""
     for i in range(height + 1):
         if i < height - 1 - row:
-            text = text + " "
+            text += " "
         else:
-            text = text + "#"
+            text += "#"
     print(text)
-    row = row + 1
+    row += 1
