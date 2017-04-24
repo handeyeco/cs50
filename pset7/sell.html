@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sell
+{% endblock %}
+
+{% block main %}
+<h3>{{ user.username }} {{ usd(user.value) }}</h3>
+<p>Cash: {{ usd(user.cash) }} ~ Stocks: {{ usd(user.value - user.cash) }}</p>
+
+<hr>
+
+<form action="{{ url_for('sell') }}" method="post">
+{% for symbol in portfolio %}
+    <p>
+        <strong>{{ portfolio[symbol].name }} ({{ portfolio[symbol].symbol }})</strong> Shares: {{ portfolio[symbol].count }}, Price: {{ usd(portfolio[symbol].price) }}, Value: {{ usd(portfolio[symbol].count * portfolio[symbol].price) }}
+        <input autocomplete="off" autofocus class="form-control" name="{{portfolio[symbol].price}}_{{portfolio[symbol].stock_id}}" type="number" value=0 min=0 max={{portfolio[symbol].count}} />
+    </p>
+{% endfor %}
+    <div class="form-group">
+        <button class="btn btn-default" type="submit">Sell</button>
+    </div>
+</form>
+{% endblock %}

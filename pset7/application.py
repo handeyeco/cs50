@@ -86,7 +86,7 @@ def buy():
             stock = db.execute('SELECT * FROM stocks WHERE (symbol=:symbol)', symbol=quote['symbol'])
         stock = stock[0]
 
-        db.execute('INSERT INTO transactions (user_id, stock_id, count, buy) VALUES (:user_id, :stock_id, :count, :buy)', user_id=user['id'], stock_id=stock['id'], count=shares, buy=1)
+        db.execute('INSERT INTO transactions (user_id, stock_id, count, buy, price) VALUES (:user_id, :stock_id, :count, :buy, :price)', user_id=user['id'], stock_id=stock['id'], count=shares, buy=1, price=quote['price'])
         user['cash'] = user['cash'] - (quote['price'] * shares)
         db.execute('UPDATE users SET cash=:cash WHERE id=:user_id', cash=user['cash'], user_id=user['id'])
 
@@ -184,5 +184,34 @@ def register():
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
-    """Sell shares of stock."""
-    return apology("TODO")
+    user = db.execute("SELECT * FROM users WHERE (id=:user_id)", user_id=session["user_id"])[0]
+    transactions = db.execute("SELECT * FROM transactions JOIN stocks ON transactions.stock_id = stocks.id WHERE transactions.user_id = :user_id", user_id=session["user_id"])
+    portfolio = {}
+    for tx in transactions:
+        symbol = tx['symbol']
+        if symbol in portfolio:
+            if tx['buy'] == 1:
+                portfolio[symbol]['count'] += tx['count']
+            else:
+                portfolio[symbol]['count'] -= tx['count']
+        else:
+            tx['price'] = lookup(symbol)['price']
+            portfolio[symbol] = tx
+
+    user['value'] = user['cash']
+    for symbol in portfolio:
+        user['value'] += portfolio[symbol]['count'] * portfolio[symbol]['price']
+
+    if request.method == "POST":
+        for name, value in request.form.items():
+            value = int(value)
+            if value > 0:
+                data = name.split("_")
+                db.execute('INSERT INTO transactions (user_id, stock_id, count, buy, price) VALUES (:user_id, :stock_id, :count, :buy, :price)', user_id=user['id'], stock_id=data[1], count=value, buy=0, price=data[0])
+                cash = user['cash'] + float(data[0]) * value
+                db.execute('UPDATE users SET cash=:cash WHERE id=:user_id', cash=cash, user_id=user['id'])
+
+
+        return redirect(url_for("sell"))
+
+    return render_template("sell.html", portfolio=portfolio, user=user, usd=usd)
