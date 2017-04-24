@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Admin
+{% endblock %}
+
+{% block main %}
+    <h3>Update Password</h3>
+    {% if error %}
+        <p class="text-danger">{{ error }}</p>
+    {% endif %}
+    <form action="{{ url_for('admin') }}" method="post">
+        <fieldset>
+            <div class="form-group">
+                <input class="form-control" name="old-password" placeholder="Old Password" type="password"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="new-password" placeholder="New Password" type="password"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="confirm-password" placeholder="Confirm Password" type="password"/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-default" type="submit">Update</button>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

@@ -53,6 +53,33 @@ def index():
 
     return render_template("index.html", portfolio=portfolio, user=user, usd=usd)
 
+@app.route("/admin", methods=["GET", "POST"])
+@login_required
+def admin():
+    if request.method == "GET":
+        return render_template("admin.html")
+
+    old = request.form.get("old-password")
+    new = request.form.get("new-password")
+    confirm = request.form.get("confirm-password")
+    error = False
+
+    if not old.isalnum() or not new.isalnum() or not confirm.isalnum():
+        error = "Passwords may only contain letters and numbers"
+    elif new != confirm:
+        error = "Password confirmation failed"
+
+    user = db.execute("SELECT * FROM users WHERE id=:user_id", user_id=session['user_id'])[0]
+
+    if not pwd_context.verify(old, user["hash"]):
+        error = "Password does not match password on file"
+
+    if error:
+        return render_template("admin.html", error=error)
+
+    db.execute("UPDATE users SET hash=:password WHERE id=:user_id", password=pwd_context.hash(new), user_id=user["id"])
+
+    return redirect(url_for("index"))
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -97,8 +124,10 @@ def buy():
 @app.route("/history")
 @login_required
 def history():
-    """Show history of transactions."""
-    return apology("TODO")
+    history = db.execute("SELECT * FROM transactions JOIN stocks ON transactions.stock_id = stocks.id WHERE transactions.user_id = :user_id ORDER BY transactions.date DESC", user_id=session["user_id"])
+
+    return render_template("history.html", history=history, usd=usd)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
