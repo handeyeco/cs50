@@ -33,7 +33,26 @@ db = SQL("sqlite:///finance.db")
 @app.route("/")
 @login_required
 def index():
-    return apology("TODO")
+    user = db.execute("SELECT * FROM users WHERE (id=:user_id)", user_id=session["user_id"])[0]
+    transactions = db.execute("SELECT * FROM transactions JOIN stocks ON transactions.stock_id = stocks.id WHERE transactions.user_id = :user_id", user_id=session["user_id"])
+    portfolio = {}
+    for tx in transactions:
+        symbol = tx['symbol']
+        if symbol in portfolio:
+            if tx['buy'] == 1:
+                portfolio[symbol]['count'] += tx['count']
+            else:
+                portfolio[symbol]['count'] -= tx['count']
+        else:
+            tx['price'] = lookup(symbol)['price']
+            portfolio[symbol] = tx
+
+    user['value'] = user['cash']
+    for symbol in portfolio:
+        user['value'] += portfolio[symbol]['count'] * portfolio[symbol]['price']
+
+    return render_template("index.html", portfolio=portfolio, user=user, usd=usd)
+
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required

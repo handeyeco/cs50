@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    CS50
+{% endblock %}
+
+{% block main %}
+<h3>{{ user.username }} {{ usd(user.value) }}</h3>
+<p>Cash: {{ usd(user.cash) }} ~ Stocks: {{ usd(user.value - user.cash) }}</p>
+
+<hr>
+
+{% for symbol in portfolio %}
+    <p><strong>{{ portfolio[symbol].name }} ({{ portfolio[symbol].symbol }})</strong> Shares: {{ portfolio[symbol].count }} Price: {{ usd(portfolio[symbol].price) }} Value: {{ usd(portfolio[symbol].count * portfolio[symbol].price) }}</p>
+{% endfor %}
+{% endblock %}
