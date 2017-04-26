@@ -44,22 +44,28 @@ def search():
     query = request.args.get('q')
     query = re.sub("\+", " ", query)
     l = Location(query)
+    if l.city:
+        city = l.city + "%"
+    if l.state:
+        state = l.state + "%"
+    if l.zipcode:
+        zipcode = l.zipcode + "%"
     result = []
 
     if l.city and l.state and l.zipcode:
-        result = db.execute("SELECT * FROM places WHERE place_name=:place_name AND admin_name1=:admin_name1 AND postal_code=:postal_code", place_name=l.city, admin_name1=l.state, postal_code=l.zipcode)
+        result = db.execute("SELECT * FROM places WHERE place_name LIKE :place_name AND admin_name1 LIKE :admin_name1 AND postal_code LIKE :postal_code", place_name=city, admin_name1=state, postal_code=zipcode)
     elif l.city and l.zipcode:
-        result = db.execute("SELECT * FROM places WHERE place_name=:place_name AND postal_code=:postal_code", place_name=l.city, postal_code=l.zipcode)
+        result = db.execute("SELECT * FROM places WHERE place_name LIKE :place_name AND postal_code LIKE :postal_code", place_name=city, postal_code=zipcode)
     elif l.city and l.state:
-        result = db.execute("SELECT * FROM places WHERE place_name=:place_name AND admin_name1=:admin_name1", place_name=l.city, admin_name1=l.state)
+        result = db.execute("SELECT * FROM places WHERE place_name LIKE :place_name AND admin_name1 LIKE :admin_name1", place_name=city, admin_name1=state)
     elif l.state and l.zipcode:
-        result = db.execute("SELECT * FROM places WHERE admin_name1=:admin_name1 AND postal_code=:postal_code", admin_name1=l.state, postal_code=l.zipcode)
+        result = db.execute("SELECT * FROM places WHERE admin_name1 LIKE :admin_name1 AND postal_code LIKE :postal_code", admin_name1=state, postal_code=zipcode)
     elif l.city:
-        result = db.execute("SELECT * FROM places WHERE place_name=:place_name", place_name=l.city)
+        result = db.execute("SELECT * FROM places WHERE place_name LIKE :place_name", place_name=city)
     elif l.state:
-        result = db.execute("SELECT * FROM places WHERE admin_name1=:admin_name1", admin_name1=l.state)
+        result = db.execute("SELECT * FROM places WHERE admin_name1 LIKE :admin_name1", admin_name1=state)
     elif l.zipcode:
-        result = db.execute("SELECT * FROM places WHERE postal_code=:postal_code", postal_code=l.zipcode)
+        result = db.execute("SELECT * FROM places WHERE postal_code LIKE :postal_code", postal_code=zipcode)
 
     return jsonify(result)
 
